@@ -1,0 +1,144 @@
+@startuml
+
+abstract class Entity {
+- UUID id
++ Entity(UUID)
+    + getId(): UUID
+    + equals(Object): boolean
+    + hashCode(): int
+
+}
+
+interface Auditable {
+    - date created_at
+    - date deleted_at
++ getCreatedAt(): Instant
+    + setCreatedAt(Instant): void
+    + getDeletedAt(): Optional<Instant>
+    + setDeletedAt(Instant): void
+    + isDeleted(): boolean
+}
+
+class User {
+    - string name
+    - string email
+    - secretKey password
+    - ArtistProfile artistProfile
+    - Set<Chat> chats
+
++ changeName(String): void
+    + updateEmail(String): void
+    + setPassword(String): void
+    + verifyPassword(String): boolean
+    + getArtistProfile(): Optional<ArtistProfile>
+    + promoteToArtist(ArtistProfile): void
+    + addChat(Chat): void
+}
+
+class ArtistProfile {
+    - string biodata
+    - ArtistStatus status
+    - bigDecimal startingMoney
+    - float rating
+- Set<Post> posts
+
++ updateBiodata(String): void
+    + setStatus(ArtistStatus): void
+    + updateRating(float): void
+    + addPost(Post): void
+    + getAverageRating(): float
+}
+
+enum ArtistStatus{
+AVAILABLE
+BUSY
+NOT_AVAILABLE
+}
+
+class Post {
+    - UUID artistId
+    - string imgUrl
+    - string description
+    - long like
++ updateDescription(String): void
+    + incrementLikes(): void
+    + decrementLikes(): void
+}
+
+class Chat {
+    - UUID userId
+    - UUID artistId
++ addMessage(Message): void
+    + getLatestMessage(): Optional<Message>
+    + isParticipant(UUID): boolean
+}
+
+class Message {
+- UUID chatId
+- UUID userid
+- string msg
++ getContent(): String
+    + getSenderId(): UUID
+}
+
+class CommisionOrder {
+- UUID userid
+- UUID artistid
+- string description
+- string referenceUrl
++ CommisionOrder(UUID, UUID, String)
+    + attachTransaction(Transaction): void
+    + isPaid(): boolean
+    + getSummary(): String
+}
+
+class Transaction {
+- UUID orderId
+- UUID methodId
+- TransactionStatus status
+- bigDecimal totalPrice
++ Transaction(BigDecimal, TransactionMethod)
+    + complete(): void
+    + cancel(): void
+    + getStatus(): TransactionStatus
+}
+
+enum TransactionStatus{
+PENDING
+COMPLETED
+CANCELLED
+}
+
+class TransactionMethod {
+- string name
+- string description
++ getName(): String
+    + getDescription(): String
+}
+
+Entity <|-- User
+Entity <|-- Chat
+Entity <|-- Post
+Entity <|-- ArtistProfile
+Entity <|-- TransactionMethod
+Entity <|-- Message
+Entity <|-- Transaction
+Entity <|-- CommisionOrder
+
+User *-- ArtistProfile
+ArtistProfile *-- Post
+ArtistProfile --> ArtistStatus
+
+Chat o-- User
+Message --* Chat
+
+CommisionOrder o-- User
+CommisionOrder o-- ArtistProfile
+CommisionOrder *-- Transaction
+Transaction --> TransactionMethod
+Transaction --> TransactionStatus
+
+
+Auditable <|.. Entity
+
+@enduml
